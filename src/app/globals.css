@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0b1220;
+  --surface: #111a2e;
+  --surface-2: #18233c;
+  --border: #23304d;
+  --foreground: #e6ecf7;
+  --muted: #8fa0bf;
+  --accent: #34d399;
+  --accent-strong: #10b981;
+  --danger: #f87171;
+  --warning: #fbbf24;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-edge: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Sensible defaults for form controls on the dark theme */
+input,
+select,
+textarea {
+  color-scheme: dark;
+}
