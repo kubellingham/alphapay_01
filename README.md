@@ -66,10 +66,19 @@ The staff dashboard appears at `/admin` (Orders · Rates · Accounts · Users).
 
 ### 4. Refresh market rates
 
-`GET /api/cron/refresh-rates` pulls the latest market rates. Locally just open
-it in the browser; in production the Vercel cron in `vercel.json` calls it
-hourly (protected by `CRON_SECRET`). Margins are edited in **Staff → Rates**;
-changing a rate never affects already-placed orders.
+Rates stay fresh three ways, all needing `SUPABASE_SERVICE_ROLE_KEY`:
+
+- **On traffic (main path):** any page view that finds rates older than an
+  hour serves the stored rate and refreshes in the background.
+- **Daily cron backstop:** the Vercel cron in `vercel.json` calls
+  `GET /api/cron/refresh-rates` (protected by `CRON_SECRET`) even when the
+  site has no visitors.
+- **Manually:** the "Refresh rates now" button in **Staff → Rates**.
+
+Margins are edited in **Staff → Rates**; changing a rate never affects
+already-placed orders. The free FX feed publishes roughly daily — for true
+intraday rates, swap the URL in `fetchMarketRates()` (`src/lib/rates.ts`)
+for a keyed provider.
 
 ## Deploying (Vercel)
 

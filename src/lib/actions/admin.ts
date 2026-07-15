@@ -72,6 +72,25 @@ export async function updateOrderStatus(
   return { saved: true };
 }
 
+export async function refreshRatesNow(): Promise<AdminActionState> {
+  await requireStaffUser();
+
+  const { refreshRates } = await import("@/lib/rates");
+  const result = await refreshRates();
+  if (!result.ok) {
+    return {
+      error:
+        result.error === "SUPABASE_SERVICE_ROLE_KEY is not set"
+          ? "The rate feed isn't connected yet — add the SUPABASE_SERVICE_ROLE_KEY in Vercel first (go-live guide, step 2)."
+          : `Could not refresh rates: ${result.error}`,
+    };
+  }
+
+  revalidatePath("/admin/rates");
+  revalidatePath("/");
+  return { saved: true };
+}
+
 export async function updateMargin(
   _prev: AdminActionState,
   form: FormData,
