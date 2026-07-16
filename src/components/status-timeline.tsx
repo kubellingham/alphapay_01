@@ -1,9 +1,5 @@
-import {
-  STATUS_INFO,
-  formatDateTime,
-  type OrderEvent,
-  type OrderStatus,
-} from "@/lib/types";
+import { STATUS_INFO, type OrderEvent, type OrderStatus } from "@/lib/types";
+import { LocalTime } from "@/components/local-time";
 
 const DOT_CLASSES = {
   pending: "bg-warning",
@@ -34,7 +30,7 @@ export function StatusTimeline({ events }: { events: OrderEvent[] }) {
                 </p>
               )}
               <p className="mt-0.5 text-xs text-muted">
-                {formatDateTime(event.created_at)}
+                <LocalTime iso={event.created_at} />
               </p>
             </div>
           </li>

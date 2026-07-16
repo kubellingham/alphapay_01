@@ -40,3 +40,37 @@ select,
 textarea {
   color-scheme: dark;
 }
+
+/* Mobile polish: no grey tap flash, gentle press feedback, comfy targets */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+a {
+  touch-action: manipulation;
+}
+button:active,
+a:active {
+  opacity: 0.85;
+}
+@media (prefers-reduced-motion: reduce) {
+  button:active,
+  a:active {
+    opacity: 1;
+  }
+}
+
+/* Printing (official receipts): only the receipt card, on white */
+@media print {
+  body {
+    background: #ffffff;
+  }
+  header,
+  footer,
+  nav {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+}

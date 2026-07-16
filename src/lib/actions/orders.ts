@@ -88,7 +88,7 @@ export async function createOrder(
   // display-only. The quoted rate is locked into the order.
   const { data: rate, error: rateError } = await supabase
     .from("rates")
-    .select("effective_rate")
+    .select("effective_rate, margin_percent")
     .eq("pair", direction)
     .single();
   if (rateError || !rate) {
@@ -97,21 +97,36 @@ export async function createOrder(
   const effectiveRate = Number(rate.effective_rate);
   const sendAmount = receiveAmount / effectiveRate;
 
-  const { data: order, error } = await supabase
+  const orderRow = {
+    user_id: user.id,
+    direction,
+    send_currency: info.send,
+    send_amount: Math.round(sendAmount * 100) / 100,
+    receive_currency: info.receive,
+    receive_amount: Math.round(receiveAmount * 100) / 100,
+    rate_used: effectiveRate,
+    margin_used: Number(rate.margin_percent),
+    delivery_method: deliveryMethod,
+    delivery_details: deliveryDetails,
+  };
+
+  let { data: order, error } = await supabase
     .from("orders")
-    .insert({
-      user_id: user.id,
-      direction,
-      send_currency: info.send,
-      send_amount: Math.round(sendAmount * 100) / 100,
-      receive_currency: info.receive,
-      receive_amount: Math.round(receiveAmount * 100) / 100,
-      rate_used: effectiveRate,
-      delivery_method: deliveryMethod,
-      delivery_details: deliveryDetails,
-    })
+    .insert(orderRow)
     .select("id")
     .single();
+
+  // Graceful fallback while the 0004 migration (margin_used column) hasn't
+  // been applied yet — never block a customer order on a stats column.
+  if (error && error.message.includes("margin_used")) {
+    const legacyRow: Partial<typeof orderRow> = { ...orderRow };
+    delete legacyRow.margin_used;
+    ({ data: order, error } = await supabase
+      .from("orders")
+      .insert(legacyRow)
+      .select("id")
+      .single());
+  }
 
   if (error || !order) {
     return { error: "Could not create the order. Please try again." };
@@ -148,7 +163,9 @@ export async function uploadReceipt(
     .eq("id", orderId)
     .single();
   if (!order || order.user_id !== user.id) return { error: "Order not found." };
-  if (order.status !== "awaiting_payment") {
+  // Receipts can be submitted while awaiting payment, replaced while under
+  // review, and re-submitted after a rejection (order returns to review).
+  if (!["awaiting_payment", "under_review", "rejected"].includes(order.status)) {
     return { error: "This order is no longer waiting for a receipt." };
   }
 

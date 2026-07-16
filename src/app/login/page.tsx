@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getUserAndProfile } from "@/lib/auth";
 import { signInWithGoogle } from "@/lib/actions/auth";
+import { PendingButton } from "@/components/pending-button";
 
 export const metadata = { title: "Sign in" };
 
@@ -32,7 +33,7 @@ export default async function LoginPage({
       )}
 
       <form action={signIn} className="mt-8 w-full">
-        <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-edge bg-surface px-4 py-3 font-semibold hover:bg-surface-2">
+        <PendingButton pendingText="Opening Google…" className="flex w-full items-center justify-center gap-3 rounded-xl border border-edge bg-surface px-4 py-3 font-semibold hover:bg-surface-2">
           <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
             <path
               fill="#4285F4"
@@ -52,7 +53,7 @@ export default async function LoginPage({
             />
           </svg>
           Continue with Google
-        </button>
+        </PendingButton>
       </form>
 
       <p className="mt-6 text-xs text-muted">

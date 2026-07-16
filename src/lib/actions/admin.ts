@@ -172,6 +172,32 @@ export async function toggleCollectionAccount(form: FormData): Promise<void> {
   revalidatePath("/admin/accounts");
 }
 
+export async function deleteOrder(
+  _prev: AdminActionState,
+  form: FormData,
+): Promise<AdminActionState> {
+  const { supabase } = await requireStaffUser();
+
+  const orderId = str(form, "order_id");
+  const { data: order } = await supabase
+    .from("orders")
+    .select("id, receipt_path")
+    .eq("id", orderId)
+    .single();
+  if (!order) return { error: "Order not found." };
+
+  if (order.receipt_path) {
+    // Best effort — an orphaned file is not worth blocking the delete.
+    await supabase.storage.from("receipts").remove([order.receipt_path]);
+  }
+
+  const { error } = await supabase.from("orders").delete().eq("id", orderId);
+  if (error) return { error: `Could not delete the order: ${error.message}` };
+
+  revalidatePath("/admin/orders");
+  redirect("/admin/orders?deleted=1");
+}
+
 export async function setUserRole(
   _prev: AdminActionState,
   form: FormData,

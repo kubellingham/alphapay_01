@@ -10,6 +10,7 @@ export default async function AdminLayout({
 
   const tabs = [
     { href: "/admin/orders", label: "Orders" },
+    { href: "/admin/stats", label: "Stats" },
     { href: "/admin/rates", label: "Rates" },
     ...(profile.role === "admin"
       ? [
@@ -23,7 +24,7 @@ export default async function AdminLayout({
     <div className="mx-auto w-full max-w-5xl px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Staff dashboard</h1>
-        <nav className="flex gap-1 rounded-xl bg-surface p-1 text-sm font-medium">
+        <nav className="flex max-w-full gap-1 overflow-x-auto rounded-xl bg-surface p-1 text-sm font-medium">
           {tabs.map((tab) => (
             <Link
               key={tab.href}

@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AutoRefresh } from "@/components/auto-refresh";
+import { DeleteOrderButton } from "@/components/delete-order-button";
 import { OrderReviewActions } from "@/components/order-review-actions";
 import { StatusBadge } from "@/components/status-badge";
+import { LocalTime } from "@/components/local-time";
 import { StatusTimeline } from "@/components/status-timeline";
 import { createClient } from "@/lib/supabase/server";
 import {
-  formatDateTime,
   formatMoney,
   type Order,
   type OrderEvent,
@@ -48,8 +50,19 @@ export default async function AdminOrderDetailPage({
     receiptIsPdf = order.receipt_path.endsWith(".pdf");
   }
 
+  const phoneDigits = customer?.phone?.replace(/[^0-9]/g, "") ?? "";
+  const waMessage = encodeURIComponent(
+    `Hello ${customer?.full_name ?? ""}! 👋 AlphaPay here.\n\n` +
+      `Your transfer ${order.reference} has been delivered:\n` +
+      `• You received: ${formatMoney(Number(order.receive_amount), order.receive_currency)}\n` +
+      `• Sender paid: ${formatMoney(Number(order.send_amount), order.send_currency)}\n\n` +
+      `Your official receipt is in the app under My orders → ${order.reference}.\n` +
+      `Thank you for using AlphaPay! 🇹🇿🇮🇳`,
+  );
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <AutoRefresh intervalMs={15000} />
       <div className="space-y-6">
         <div className="flex items-start justify-between">
           <div>
@@ -63,7 +76,7 @@ export default async function AdminOrderDetailPage({
               {Number(order.rate_used).toLocaleString("en-US", {
                 maximumSignificantDigits: 6,
               })}{" "}
-              · {formatDateTime(order.created_at)}
+              · <LocalTime iso={order.created_at} />
             </p>
           </div>
           <StatusBadge status={order.status} />
@@ -160,12 +173,38 @@ export default async function AdminOrderDetailPage({
           </dl>
         </section>
 
+        {order.status === "delivered" && (
+          <section className="rounded-2xl border border-accent/40 bg-surface p-5">
+            <h3 className="font-bold">Receipt</h3>
+            <div className="mt-3 space-y-2">
+              <Link
+                href={`/orders/${order.id}/receipt`}
+                className="block rounded-xl border border-edge py-2.5 text-center text-sm font-semibold hover:border-accent"
+              >
+                🧾 View official receipt
+              </Link>
+              {phoneDigits && (
+                <a
+                  href={`https://wa.me/${phoneDigits}?text=${waMessage}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block rounded-xl bg-[#25D366] py-2.5 text-center text-sm font-bold text-background"
+                >
+                  Send receipt via WhatsApp
+                </a>
+              )}
+            </div>
+          </section>
+        )}
+
         <section className="rounded-2xl border border-edge bg-surface p-5">
           <h3 className="font-bold">History</h3>
           <div className="mt-4">
             <StatusTimeline events={events} />
           </div>
         </section>
+
+        <DeleteOrderButton orderId={order.id} reference={order.reference} />
 
         <Link
           href="/admin/orders"

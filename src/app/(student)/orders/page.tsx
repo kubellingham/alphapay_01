@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { StatusBadge } from "@/components/status-badge";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formatDateTime, formatMoney, type Order } from "@/lib/types";
+import { formatMoney, type Order } from "@/lib/types";
+import { LocalTime } from "@/components/local-time";
 
 export const metadata = { title: "My orders" };
 export const dynamic = "force-dynamic";
@@ -19,6 +21,7 @@ export default async function OrdersPage() {
 
   return (
     <div>
+      <AutoRefresh intervalMs={15000} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">My orders</h1>
         <Link
@@ -65,7 +68,7 @@ export default async function OrdersPage() {
                 </div>
                 <p className="mt-1 text-xs text-muted">
                   {order.delivery_method === "cash" ? "Cash delivery" : "Bank transfer"} ·{" "}
-                  {formatDateTime(order.created_at)}
+                  <LocalTime iso={order.created_at} />
                 </p>
               </Link>
             </li>
