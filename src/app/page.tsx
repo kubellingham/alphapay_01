@@ -75,13 +75,7 @@ export default async function Home() {
     <div className="mx-auto max-w-5xl px-4">
       <section className="grid items-center gap-10 py-10 md:grid-cols-2 md:py-16">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary">
-            <span>🇹🇿</span>
-            <span className="h-[5px] w-[5px] rounded-full bg-primary" />
-            <span>🇮🇳</span>
-            Tanzania ↔ India
-          </span>
-          <h1 className="mt-4 text-4xl font-extrabold leading-[1.1] tracking-tight md:text-5xl">
+          <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight md:text-5xl">
             Send money home, or to school — safely.
           </h1>
           <p className="mt-4 max-w-[46ch] text-[15px] leading-relaxed text-muted">
