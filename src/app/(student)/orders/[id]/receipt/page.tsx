@@ -5,7 +5,7 @@ import { PrintButton } from "@/components/print-button";
 import { StatusBadge } from "@/components/status-badge";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formatDateTime, formatMoney, type Order, type Profile } from "@/lib/types";
+import { formatDateTime, formatMoney, type Order } from "@/lib/types";
 
 export const metadata = { title: "Receipt" };
 export const dynamic = "force-dynamic";
@@ -24,22 +24,18 @@ export default async function ReceiptPage({
   const order = data as Order;
   if (order.status !== "delivered") notFound();
 
-  const [{ data: customerData }, { data: deliveredEvent }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", order.user_id).single(),
-    supabase
-      .from("order_events")
-      .select("created_at")
-      .eq("order_id", id)
-      .eq("to_status", "delivered")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ]);
-  const customer = customerData as Profile | null;
+  const { data: deliveredEvent } = await supabase
+    .from("order_events")
+    .select("created_at")
+    .eq("order_id", id)
+    .eq("to_status", "delivered")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
   const deliveredAt = deliveredEvent?.created_at ?? order.updated_at;
   const details = order.delivery_details as unknown as Record<string, string>;
-  const recipient =
-    details.recipient_name ?? details.account_name ?? customer?.full_name ?? "—";
+  // Names on the receipt come from what was typed on the order, never Google.
+  const recipient = details.recipient_name ?? details.account_name ?? "—";
   const deliveryLine =
     order.delivery_method === "cash"
       ? `Cash · ${[details.city, details.address].filter(Boolean)[0] ?? ""}`
@@ -99,10 +95,6 @@ export default async function ReceiptPage({
           </div>
 
           <dl className="flex flex-col gap-2.5 py-4 text-[13.5px]">
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">Customer</dt>
-              <dd className="font-semibold">{customer?.full_name ?? "—"}</dd>
-            </div>
             <div className="flex justify-between gap-4">
               <dt className="text-muted">Recipient</dt>
               <dd className="font-semibold">{recipient}</dd>

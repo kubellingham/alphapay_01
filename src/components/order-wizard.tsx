@@ -91,7 +91,7 @@ export function OrderWizard({
 
         <label className="block rounded-[14px] border border-edge-strong bg-surface-2 px-3.5 py-3">
           <span className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">They receive</span>
+            <span className="text-xs font-semibold text-muted">Receive</span>
             <span className="text-[13px] font-bold">
               {FLAGS[info.receive]} {info.receive}
             </span>
@@ -108,7 +108,7 @@ export function OrderWizard({
 
         <div className="rounded-[14px] border border-edge-strong bg-surface-2 px-3.5 py-3">
           <span className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">You send</span>
+            <span className="text-xs font-semibold text-muted">Send</span>
             <span className="text-[13px] font-bold">
               {FLAGS[info.send]} {info.send}
             </span>
@@ -280,16 +280,16 @@ export function OrderWizard({
 
         <div className="rounded-2xl border border-edge bg-surface p-4">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] text-muted">You send</span>
-            <span className="text-lg font-extrabold">
-              {sendAmount > 0 ? formatMoney(sendAmount, info.send) : "—"}
+            <span className="text-[13px] text-muted">Receive</span>
+            <span className="text-lg font-extrabold text-primary">
+              {receiveAmount > 0 ? formatMoney(receiveAmount, info.receive) : "—"}
             </span>
           </div>
           <div className="my-3 h-px bg-edge" />
           <div className="flex items-center justify-between">
-            <span className="text-[13px] text-muted">They receive</span>
-            <span className="text-lg font-extrabold text-primary">
-              {receiveAmount > 0 ? formatMoney(receiveAmount, info.receive) : "—"}
+            <span className="text-[13px] text-muted">Send</span>
+            <span className="text-lg font-extrabold">
+              {sendAmount > 0 ? formatMoney(sendAmount, info.send) : "—"}
             </span>
           </div>
           <div className="my-3 h-px bg-edge" />

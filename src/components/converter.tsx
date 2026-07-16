@@ -66,21 +66,21 @@ export function Converter({ rates }: { rates: RatesByPair }) {
       </div>
 
       <div className="flex flex-col gap-2.5 p-4 pb-[18px]">
-        {/* You send */}
+        {/* Receive — the currency you asked for sits on top */}
         <label className="block rounded-[14px] border border-edge-strong bg-surface-2 px-3.5 py-3">
           <span className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">You send</span>
+            <span className="text-xs font-semibold text-muted">Receive</span>
             <span className="inline-flex items-center gap-1.5 text-[13px] font-bold">
-              {FLAGS[info.send]} {info.send}
+              {FLAGS[info.receive]} {info.receive}
             </span>
           </span>
           <input
             inputMode="decimal"
             placeholder="0"
-            value={sendValue}
+            value={receiveValue}
             onChange={(e) => {
-              setEdited("send");
-              setSendText(e.target.value);
+              setEdited("receive");
+              setReceiveText(e.target.value);
             }}
             className="mt-1 w-full border-none bg-transparent text-[26px] font-bold outline-none"
           />
@@ -108,21 +108,21 @@ export function Converter({ rates }: { rates: RatesByPair }) {
           <span className="h-px flex-1 bg-edge" />
         </div>
 
-        {/* They receive */}
+        {/* Send */}
         <label className="block rounded-[14px] border border-edge-strong bg-surface-2 px-3.5 py-3">
           <span className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">They receive</span>
+            <span className="text-xs font-semibold text-muted">Send</span>
             <span className="inline-flex items-center gap-1.5 text-[13px] font-bold">
-              {FLAGS[info.receive]} {info.receive}
+              {FLAGS[info.send]} {info.send}
             </span>
           </span>
           <input
             inputMode="decimal"
             placeholder="0"
-            value={receiveValue}
+            value={sendValue}
             onChange={(e) => {
-              setEdited("receive");
-              setReceiveText(e.target.value);
+              setEdited("send");
+              setSendText(e.target.value);
             }}
             className="mt-1 w-full border-none bg-transparent text-[26px] font-bold outline-none"
           />
