@@ -13,7 +13,7 @@ export default async function ProfilePage() {
       <p className="mt-1 text-sm text-muted">
         Signed in as <span className="font-semibold text-foreground">{user.email}</span>
         {profile?.role !== "student" && (
-          <span className="ml-2 rounded-full bg-warning/15 px-2 py-0.5 text-xs font-semibold text-warning">
+          <span className="ml-2 rounded-full bg-warning-soft px-2 py-0.5 text-xs font-semibold text-warning">
             {profile?.role}
           </span>
         )}

@@ -1,44 +1,150 @@
 @import "tailwindcss";
 
+/* AlphaPay design tokens — from the "AlphaPay Visual Redesign" design system.
+   Jade primary (the green shared by the Tanzanian and Indian flags),
+   marigold accent for rates and highlights, full dark + light themes. */
 :root {
-  --background: #0b1220;
-  --surface: #111a2e;
-  --surface-2: #18233c;
-  --border: #23304d;
-  --foreground: #e6ecf7;
-  --muted: #8fa0bf;
-  --accent: #34d399;
-  --accent-strong: #10b981;
-  --danger: #f87171;
-  --warning: #fbbf24;
+  --bg: #0c1116;
+  --surface: #131b22;
+  --surface-2: #1a242d;
+  --surface-3: #25313b;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.17);
+  --text: #e9eef1;
+  --muted: #93a1ab;
+  --faint: #68757f;
+  --primary: #2fb891;
+  --primary-hover: #40c79f;
+  --primary-fg: #04140e;
+  --primary-soft: rgba(47, 184, 145, 0.15);
+  --accent: #f4b45a;
+  --accent-soft: rgba(244, 180, 90, 0.15);
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.15);
+  --success-fg: #04140e;
+  --warning: #f5b544;
+  --warning-soft: rgba(245, 181, 68, 0.16);
+  --warning-fg: #1a1204;
+  --danger: #fb7185;
+  --danger-soft: rgba(251, 113, 133, 0.16);
+  --danger-fg: #1a0509;
+  --info: #60a5fa;
+  --info-soft: rgba(96, 165, 250, 0.16);
+  --info-fg: #05101f;
+  --ring: rgba(47, 184, 145, 0.5);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f3f6f4;
+    --surface: #ffffff;
+    --surface-2: #eef2f0;
+    --surface-3: #e1e8e4;
+    --border: rgba(12, 20, 26, 0.11);
+    --border-strong: rgba(12, 20, 26, 0.2);
+    --text: #0f1a20;
+    --muted: #54636c;
+    --faint: #85939c;
+    --primary: #0e7c66;
+    --primary-hover: #0b6b58;
+    --primary-fg: #ffffff;
+    --primary-soft: rgba(14, 124, 102, 0.1);
+    --accent: #a9700f;
+    --accent-soft: rgba(169, 112, 15, 0.12);
+    --success: #0f9d6b;
+    --success-soft: rgba(15, 157, 107, 0.11);
+    --success-fg: #ffffff;
+    --warning: #b77400;
+    --warning-soft: rgba(183, 116, 0, 0.12);
+    --warning-fg: #ffffff;
+    --danger: #d64545;
+    --danger-soft: rgba(214, 69, 69, 0.1);
+    --danger-fg: #ffffff;
+    --info: #2563eb;
+    --info-soft: rgba(37, 99, 235, 0.1);
+    --info-fg: #ffffff;
+    --ring: rgba(14, 124, 102, 0.35);
+    --shadow-sm: 0 1px 2px rgba(12, 20, 26, 0.06);
+    --shadow-md: 0 6px 20px rgba(12, 20, 26, 0.09);
+    --shadow-lg: 0 20px 48px rgba(12, 20, 26, 0.14);
+  }
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --color-background: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
   --color-edge: var(--border);
-  --color-foreground: var(--foreground);
+  --color-edge-strong: var(--border-strong);
+  --color-foreground: var(--text);
   --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
-  --color-accent-strong: var(--accent-strong);
-  --color-danger: var(--danger);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-fg: var(--success-fg);
   --color-warning: var(--warning);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-fg: var(--warning-fg);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-fg: var(--danger-fg);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-info-fg: var(--info-fg);
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo,
+    Consolas, monospace;
+  --shadow-card: var(--shadow-md);
+  --shadow-float: var(--shadow-lg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--text);
   font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Sensible defaults for form controls on the dark theme */
 input,
 select,
 textarea {
   color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  input,
+  select,
+  textarea {
+    color-scheme: light;
+  }
+}
+
+::placeholder {
+  color: var(--faint);
+}
+
+/* Focus ring per the design system */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--ring);
+  outline: none;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 /* Mobile polish: no grey tap flash, gentle press feedback, comfy targets */
@@ -60,8 +166,24 @@ a:active {
   }
 }
 
-/* Printing (official receipts): only the receipt card, on white */
+/* Printing (official receipts): only the receipt card, on light paper */
 @media print {
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f2f5f3;
+    --surface-3: #e1e8e4;
+    --border: rgba(12, 20, 26, 0.15);
+    --border-strong: rgba(12, 20, 26, 0.25);
+    --text: #0f1a20;
+    --muted: #54636c;
+    --faint: #85939c;
+    --primary: #0e7c66;
+    --primary-fg: #ffffff;
+    --accent: #a9700f;
+    --success: #0f9d6b;
+    --success-soft: rgba(15, 157, 107, 0.11);
+  }
   body {
     background: #ffffff;
   }

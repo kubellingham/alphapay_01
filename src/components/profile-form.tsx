@@ -22,7 +22,7 @@ export function ProfileForm({
         <input
           name="full_name"
           defaultValue={fullName}
-          className="mt-1 w-full rounded-xl border border-edge bg-background px-3 py-3 outline-none focus:border-accent"
+          className="mt-1.5 h-12 w-full rounded-xl border border-edge-strong bg-surface-2 px-3.5 text-base outline-none"
         />
       </label>
       <label className="block text-sm font-medium">
@@ -32,7 +32,7 @@ export function ProfileForm({
           defaultValue={phone}
           inputMode="tel"
           placeholder="+91 98765 43210"
-          className="mt-1 w-full rounded-xl border border-edge bg-background px-3 py-3 outline-none focus:border-accent"
+          className="mt-1.5 h-12 w-full rounded-xl border border-edge-strong bg-surface-2 px-3.5 text-base outline-none"
         />
         <span className="mt-1 block text-xs text-muted">
           Our team uses this to coordinate your deliveries.
@@ -40,19 +40,19 @@ export function ProfileForm({
       </label>
 
       {state.error && (
-        <p className="rounded-lg border border-danger/40 bg-danger/10 px-4 py-2 text-sm text-danger">
+        <p className="rounded-lg border border-danger/40 bg-danger-soft px-4 py-2.5 text-sm text-danger">
           {state.error}
         </p>
       )}
       {state.saved && !state.error && (
-        <p className="rounded-lg border border-accent/40 bg-accent/10 px-4 py-2 text-sm text-accent">
+        <p className="rounded-lg border border-success/40 bg-success-soft px-4 py-2.5 text-sm text-success">
           Profile saved.
         </p>
       )}
 
       <button
         disabled={pending}
-        className="w-full rounded-xl bg-accent py-3 font-bold text-background disabled:opacity-60"
+        className="h-[52px] w-full rounded-[14px] bg-primary text-base font-bold text-primary-fg hover:bg-primary-hover disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save profile"}
       </button>

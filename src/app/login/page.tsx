@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { LogoMark } from "@/components/logo";
 import { getUserAndProfile } from "@/lib/auth";
 import { signInWithGoogle } from "@/lib/actions/auth";
 import { PendingButton } from "@/components/pending-button";
@@ -17,49 +18,50 @@ export default async function LoginPage({
   const signIn = signInWithGoogle.bind(null, next);
 
   return (
-    <div className="mx-auto flex max-w-md flex-col items-center px-4 py-16 text-center">
-      <span className="grid h-14 w-14 place-items-center rounded-2xl bg-accent text-2xl font-black text-background">
-        A
-      </span>
-      <h1 className="mt-6 text-2xl font-bold">Welcome to AlphaPay</h1>
-      <p className="mt-2 text-sm text-muted">
-        Sign in to place a money transfer order and track your deliveries.
-      </p>
+    <div className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col px-6 py-8">
+      <div className="flex items-center gap-2.5 font-extrabold text-lg tracking-tight">
+        <LogoMark />
+        AlphaPay
+      </div>
 
-      {error && (
-        <p className="mt-4 w-full rounded-lg border border-danger/40 bg-danger/10 px-4 py-2 text-sm text-danger">
-          {error}
+      <div className="flex flex-1 flex-col justify-center">
+        <h1 className="text-[26px] font-extrabold leading-tight tracking-tight">
+          Welcome back.
+        </h1>
+        <p className="mt-2.5 text-[15px] leading-relaxed text-muted">
+          Sign in to place a transfer and track your orders. We use your Google
+          account so there&apos;s no extra password to remember.
         </p>
-      )}
 
-      <form action={signIn} className="mt-8 w-full">
-        <PendingButton pendingText="Opening Google…" className="flex w-full items-center justify-center gap-3 rounded-xl border border-edge bg-surface px-4 py-3 font-semibold hover:bg-surface-2">
-          <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
-            <path
-              fill="#4285F4"
-              d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.7 2.8c2.4-2.1 3.7-5.1 3.7-8.5z"
-            />
-            <path
-              fill="#34A853"
-              d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.2 0-5.9-2.1-6.8-5l-3.9 3C3.3 21.3 7.3 24 12 24z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M5.2 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.7.4-2.4l-3.9-3C.5 8.2 0 10 0 12s.5 3.8 1.3 5.4l3.9-3z"
-            />
-            <path
-              fill="#EA4335"
-              d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.3 0 3.3 2.7 1.3 6.6l3.9 3c.9-2.8 3.6-4.9 6.8-4.9z"
-            />
+        {error && (
+          <p className="mt-5 rounded-xl border border-danger/40 bg-danger-soft px-4 py-2.5 text-sm text-danger">
+            {error}
+          </p>
+        )}
+
+        <form action={signIn} className="mt-6">
+          <PendingButton
+            pendingText="Opening Google…"
+            className="flex h-[52px] w-full items-center justify-center gap-3 rounded-[14px] border border-edge-strong bg-surface text-base font-bold hover:border-foreground"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden>
+              <path
+                fill="#EA4335"
+                d="M12 10.2v3.9h5.4c-.24 1.4-1.7 4.1-5.4 4.1-3.25 0-5.9-2.7-5.9-6s2.65-6 5.9-6c1.85 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.6 14.6 2.6 12 2.6 6.9 2.6 2.8 6.7 2.8 12S6.9 21.4 12 21.4c5.9 0 9.8-4.15 9.8-10 0-.67-.07-1.18-.16-1.7H12z"
+              />
+            </svg>
+            Continue with Google
+          </PendingButton>
+        </form>
+
+        <p className="mt-5 flex items-center gap-2 text-[12.5px] text-faint">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="1.7" />
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="1.7" />
           </svg>
-          Continue with Google
-        </PendingButton>
-      </form>
-
-      <p className="mt-6 text-xs text-muted">
-        No account needed in advance — your AlphaPay account is created the
-        first time you sign in.
-      </p>
+          Secured with Google sign-in — your account is created on first sign-in.
+        </p>
+      </div>
     </div>
   );
 }

@@ -60,8 +60,8 @@ export default async function AdminAccountsPage() {
                       pendingText="…"
                       className={`rounded-lg border px-3 py-1 text-xs font-semibold ${
                         account.is_active
-                          ? "border-danger/40 text-danger hover:bg-danger/10"
-                          : "border-accent/40 text-accent hover:bg-accent/10"
+                          ? "border-danger/40 text-danger hover:bg-danger-soft"
+                          : "border-success/40 text-success hover:bg-success-soft"
                       }`}
                     >
                       {account.is_active ? "Deactivate" : "Activate"}

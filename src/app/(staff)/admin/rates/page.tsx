@@ -23,8 +23,8 @@ export default async function AdminRatesPage() {
         const info = DIRECTION_INFO[pair];
         return (
           <section key={pair} className="rounded-2xl border border-edge bg-surface p-5">
-            <h2 className="font-bold">
-              {info.send} → {info.receive}
+            <h2 className="font-extrabold">
+              {info.send === "TZS" ? "🇹🇿" : "🇮🇳"} → {info.receive === "TZS" ? "🇹🇿" : "🇮🇳"} {info.send} to {info.receive}
             </h2>
             {rate ? (
               <>

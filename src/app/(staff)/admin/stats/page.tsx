@@ -86,7 +86,7 @@ export default async function AdminStatsPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-muted">Margin earned</p>
-                        <p className="text-lg font-black text-accent">
+                        <p className="text-lg font-black text-primary">
                           {formatMoney(s.profit, currency)}
                         </p>
                       </div>

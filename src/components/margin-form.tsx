@@ -26,19 +26,19 @@ export function MarginForm({
           inputMode="decimal"
           defaultValue={currentMargin}
           disabled={disabled}
-          className="w-24 rounded-xl border border-edge bg-background px-3 py-2 text-right font-semibold outline-none focus:border-accent disabled:opacity-50"
+          className="w-24 rounded-xl border border-edge-strong bg-surface-2 px-3 py-2 text-right font-mono font-semibold outline-none disabled:opacity-50"
         />
         <span className="text-sm text-muted">% margin</span>
         <button
           disabled={disabled || pending}
-          className="ml-auto rounded-xl bg-accent px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
+          className="ml-auto rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-fg disabled:opacity-50"
         >
           {pending ? "Saving…" : "Save"}
         </button>
       </div>
       {state.error && <p className="text-xs text-danger">{state.error}</p>}
       {state.saved && !state.error && (
-        <p className="text-xs text-accent">Margin updated.</p>
+        <p className="text-xs text-success">Margin updated.</p>
       )}
       {disabled && (
         <p className="text-xs text-muted">Only admins can change margins.</p>
