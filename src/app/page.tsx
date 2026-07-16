@@ -1,3 +1,4 @@
+import { AutoRefresh } from "@/components/auto-refresh";
 import { Converter } from "@/components/converter";
 import { getRates } from "@/lib/rates";
 
@@ -73,6 +74,8 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-5xl px-4">
+      {/* Keeps the displayed rate live while the page is open */}
+      <AutoRefresh intervalMs={30000} />
       <section className="grid items-center gap-10 py-10 md:grid-cols-2 md:py-16">
         <div>
           <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight md:text-5xl">
