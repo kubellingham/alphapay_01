@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { RatesByPair } from "@/lib/rates";
-import { DIRECTION_INFO, type Direction, formatDateTime } from "@/lib/types";
+import { DIRECTION_INFO, type Direction } from "@/lib/types";
+import { LocalTime } from "@/components/local-time";
 
 function parseAmount(value: string): number {
   const n = Number(value.replace(/,/g, ""));
@@ -119,7 +120,7 @@ export function Converter({
               </span>{" "}
               {info.receive}
             </span>
-            <span>Updated {formatDateTime(rate.fetched_at)}</span>
+            <span>Updated <LocalTime iso={rate.fetched_at} /></span>
           </>
         ) : (
           <span className="text-warning">

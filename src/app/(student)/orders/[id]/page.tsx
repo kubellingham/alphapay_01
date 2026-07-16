@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { ReceiptUpload } from "@/components/receipt-upload";
+import { PendingButton } from "@/components/pending-button";
 import { StatusBadge } from "@/components/status-badge";
 import { StatusTimeline } from "@/components/status-timeline";
 import { cancelOrder } from "@/lib/actions/orders";
@@ -61,9 +63,12 @@ export default async function OrderDetailPage({
   }
 
   const statusInfo = STATUS_INFO[order.status];
+  const isSettled = ["delivered", "cancelled"].includes(order.status);
 
   return (
     <div className="space-y-6">
+      {/* Statuses move without the user having to pull-to-refresh */}
+      {!isSettled && <AutoRefresh />}
       {created && (
         <div className="rounded-2xl border border-accent/40 bg-accent/10 p-4 text-sm">
           🎉 <span className="font-semibold">Order placed!</span> Now send the
@@ -164,6 +169,20 @@ export default async function OrderDetailPage({
         </dl>
       </section>
 
+      {order.status === "rejected" && (
+        <section className="rounded-2xl border border-danger/40 bg-surface p-5">
+          <h2 className="font-bold">Fix and resubmit</h2>
+          <p className="mt-1 text-sm text-muted">
+            Check the note from our team in the progress section below, then
+            upload a corrected receipt — your order goes straight back into
+            review.
+          </p>
+          <div className="mt-3">
+            <ReceiptUpload orderId={order.id} label="Resubmit corrected receipt" />
+          </div>
+        </section>
+      )}
+
       {receiptUrl && (
         <section className="rounded-2xl border border-edge bg-surface p-5">
           <h2 className="font-bold">Your receipt</h2>
@@ -175,7 +194,26 @@ export default async function OrderDetailPage({
           >
             View uploaded receipt ↗
           </a>
+          {order.status === "under_review" && (
+            <details className="mt-3">
+              <summary className="cursor-pointer text-sm text-muted">
+                Uploaded the wrong file? Replace it
+              </summary>
+              <div className="mt-3">
+                <ReceiptUpload orderId={order.id} label="Replace receipt" />
+              </div>
+            </details>
+          )}
         </section>
+      )}
+
+      {order.status === "delivered" && (
+        <Link
+          href={`/orders/${order.id}/receipt`}
+          className="block rounded-2xl border border-accent/40 bg-accent/10 p-4 text-center font-bold text-accent"
+        >
+          🧾 View &amp; download your official receipt
+        </Link>
       )}
 
       <section className="rounded-2xl border border-edge bg-surface p-5">
@@ -188,9 +226,12 @@ export default async function OrderDetailPage({
       {order.status === "awaiting_payment" && (
         <form action={cancelOrder}>
           <input type="hidden" name="order_id" value={order.id} />
-          <button className="w-full rounded-xl border border-danger/40 py-3 text-sm font-semibold text-danger hover:bg-danger/10">
+          <PendingButton
+            pendingText="Cancelling…"
+            className="w-full rounded-xl border border-danger/40 py-3 text-sm font-semibold text-danger hover:bg-danger/10"
+          >
             Cancel this order
-          </button>
+          </PendingButton>
         </form>
       )}
 

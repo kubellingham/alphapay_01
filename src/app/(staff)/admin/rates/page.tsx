@@ -2,7 +2,8 @@ import { MarginForm } from "@/components/margin-form";
 import { RefreshRatesButton } from "@/components/refresh-rates-button";
 import { requireStaff } from "@/lib/auth";
 import { getRates } from "@/lib/rates";
-import { DIRECTION_INFO, formatDateTime, type Direction } from "@/lib/types";
+import { DIRECTION_INFO, type Direction } from "@/lib/types";
+import { LocalTime } from "@/components/local-time";
 
 export const metadata = { title: "Rates" };
 export const dynamic = "force-dynamic";
@@ -46,7 +47,7 @@ export default async function AdminRatesPage() {
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-muted">Last market refresh</dt>
-                    <dd>{formatDateTime(rate.fetched_at)}</dd>
+                    <dd><LocalTime iso={rate.fetched_at} /></dd>
                   </div>
                 </dl>
                 <MarginForm

@@ -67,6 +67,7 @@ export interface Order {
   receive_currency: Currency;
   receive_amount: number;
   rate_used: number;
+  margin_used: number | null;
   delivery_method: DeliveryMethod;
   delivery_details: CashDeliveryDetails | BankDeliveryDetails;
   receipt_path: string | null;
@@ -140,12 +141,18 @@ export function formatMoney(amount: number, currency: Currency): string {
   }).format(amount);
 }
 
-export function formatDateTime(iso: string): string {
+/**
+ * Formats a timestamp. Pass the viewer's timezone when known (see the
+ * LocalTime component); defaults to IST so server-rendered times are
+ * predictable rather than the server's own clock.
+ */
+export function formatDateTime(iso: string, timeZone = "Asia/Kolkata"): string {
   return new Date(iso).toLocaleString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone,
   });
 }

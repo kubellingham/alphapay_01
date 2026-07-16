@@ -19,7 +19,8 @@ export function OrderReviewActions({
 
   const canConfirm = status === "under_review";
   const canDeliver = status === "confirmed";
-  const canReject = ["awaiting_payment", "under_review", "confirmed"].includes(status);
+  // Once payment is confirmed the only way forward is delivery.
+  const canReject = ["awaiting_payment", "under_review"].includes(status);
 
   if (!canConfirm && !canDeliver && !canReject) return null;
 

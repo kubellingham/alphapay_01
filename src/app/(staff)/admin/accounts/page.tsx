@@ -1,4 +1,5 @@
 import { AccountForm } from "@/components/account-form";
+import { PendingButton } from "@/components/pending-button";
 import { toggleCollectionAccount } from "@/lib/actions/admin";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -55,7 +56,8 @@ export default async function AdminAccountsPage() {
                       name="activate"
                       value={account.is_active ? "false" : "true"}
                     />
-                    <button
+                    <PendingButton
+                      pendingText="…"
                       className={`rounded-lg border px-3 py-1 text-xs font-semibold ${
                         account.is_active
                           ? "border-danger/40 text-danger hover:bg-danger/10"
@@ -63,7 +65,7 @@ export default async function AdminAccountsPage() {
                       }`}
                     >
                       {account.is_active ? "Deactivate" : "Activate"}
-                    </button>
+                    </PendingButton>
                   </form>
                 </div>
                 <dl className="mt-2 space-y-0.5">

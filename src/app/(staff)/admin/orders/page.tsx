@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { StatusBadge } from "@/components/status-badge";
+import { LocalTime } from "@/components/local-time";
 import { createClient } from "@/lib/supabase/server";
 import {
   STATUS_INFO,
-  formatDateTime,
   formatMoney,
   type Order,
   type OrderStatus,
@@ -47,6 +48,7 @@ export default async function AdminOrdersPage({
 
   return (
     <div>
+      <AutoRefresh intervalMs={15000} />
       <div className="flex flex-wrap gap-1.5">
         {FILTERS.map((f) => {
           const count =
@@ -111,7 +113,7 @@ export default async function AdminOrdersPage({
                     <StatusBadge status={order.status} />
                   </td>
                   <td className="px-4 py-3 text-muted">
-                    {formatDateTime(order.created_at)}
+                    <LocalTime iso={order.created_at} />
                   </td>
                 </tr>
               ))}

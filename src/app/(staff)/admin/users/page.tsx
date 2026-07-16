@@ -1,7 +1,8 @@
 import { RoleSelect } from "@/components/role-select";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formatDateTime, type Profile } from "@/lib/types";
+import { type Profile } from "@/lib/types";
+import { LocalTime } from "@/components/local-time";
 
 export const metadata = { title: "Users" };
 export const dynamic = "force-dynamic";
@@ -34,7 +35,7 @@ export default async function AdminUsersPage() {
               <td className="px-4 py-3 font-semibold">{profile.full_name ?? "—"}</td>
               <td className="px-4 py-3 text-muted">{profile.email ?? "—"}</td>
               <td className="px-4 py-3 text-muted">{profile.phone ?? "—"}</td>
-              <td className="px-4 py-3 text-muted">{formatDateTime(profile.created_at)}</td>
+              <td className="px-4 py-3 text-muted"><LocalTime iso={profile.created_at} /></td>
               <td className="px-4 py-3">
                 <RoleSelect
                   userId={profile.id}

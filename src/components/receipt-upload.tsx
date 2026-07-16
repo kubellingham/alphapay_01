@@ -2,8 +2,15 @@
 
 import { useActionState } from "react";
 import { uploadReceipt, type OrderActionState } from "@/lib/actions/orders";
+import { Spinner } from "@/components/spinner";
 
-export function ReceiptUpload({ orderId }: { orderId: string }) {
+export function ReceiptUpload({
+  orderId,
+  label = "Submit receipt for review",
+}: {
+  orderId: string;
+  label?: string;
+}) {
   const [state, formAction, pending] = useActionState<OrderActionState, FormData>(
     uploadReceipt,
     {},
@@ -28,7 +35,13 @@ export function ReceiptUpload({ orderId }: { orderId: string }) {
         disabled={pending}
         className="w-full rounded-xl bg-accent py-3 font-bold text-background disabled:opacity-60"
       >
-        {pending ? "Uploading…" : "Submit receipt for review"}
+        {pending ? (
+          <span className="inline-flex items-center gap-2">
+            <Spinner /> Uploading…
+          </span>
+        ) : (
+          label
+        )}
       </button>
     </form>
   );
