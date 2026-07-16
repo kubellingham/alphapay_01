@@ -23,13 +23,13 @@ export default async function AdminLayout({
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Staff dashboard</h1>
+        <h1 className="text-xl font-extrabold tracking-tight">Staff console</h1>
         <nav className="flex max-w-full gap-1 overflow-x-auto rounded-xl bg-surface p-1 text-sm font-medium">
           {tabs.map((tab) => (
             <Link
               key={tab.href}
               href={tab.href}
-              className="rounded-lg px-3 py-1.5 text-muted hover:bg-surface-2 hover:text-foreground"
+              className="rounded-[10px] px-3 py-1.5 font-bold text-muted hover:bg-surface-3 hover:text-foreground"
             >
               {tab.label}
             </Link>

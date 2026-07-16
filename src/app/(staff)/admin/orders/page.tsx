@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
-import { StatusBadge } from "@/components/status-badge";
 import { LocalTime } from "@/components/local-time";
+import { StatusBadge } from "@/components/status-badge";
 import { createClient } from "@/lib/supabase/server";
 import {
   STATUS_INFO,
@@ -23,6 +23,18 @@ const FILTERS: (OrderStatus | "all")[] = [
   "all",
 ];
 
+const FILTER_TEXT: Record<string, string> = {
+  under_review: "text-info",
+  awaiting_payment: "text-warning",
+  confirmed: "text-primary",
+  delivered: "text-success",
+  rejected: "text-danger",
+  cancelled: "text-muted",
+  all: "text-foreground",
+};
+
+type OrderWithProfile = Order & { profiles: { full_name: string | null } | null };
+
 export default async function AdminOrdersPage({
   searchParams,
 }: {
@@ -33,12 +45,12 @@ export default async function AdminOrdersPage({
 
   let query = supabase
     .from("orders")
-    .select("*")
+    .select("*, profiles:user_id(full_name)")
     .order("created_at", { ascending: false })
     .limit(100);
   if (status !== "all") query = query.eq("status", status);
   const { data } = await query;
-  const orders = (data ?? []) as Order[];
+  const orders = (data ?? []) as unknown as OrderWithProfile[];
 
   const { data: countsData } = await supabase.from("orders").select("status");
   const counts = new Map<string, number>();
@@ -49,71 +61,72 @@ export default async function AdminOrdersPage({
   return (
     <div>
       <AutoRefresh intervalMs={15000} />
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => {
-          const count =
-            f === "all"
-              ? (countsData?.length ?? 0)
-              : (counts.get(f) ?? 0);
+          const count = f === "all" ? (countsData?.length ?? 0) : (counts.get(f) ?? 0);
           const active = status === f;
           return (
             <Link
               key={f}
               href={`/admin/orders?status=${f}`}
-              className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+              className={`flex h-[34px] items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold ${
                 active
-                  ? "border-accent bg-accent/15 text-accent"
-                  : "border-edge text-muted hover:text-foreground"
+                  ? "bg-primary text-primary-fg"
+                  : `border border-edge-strong bg-surface-2 ${FILTER_TEXT[f]}`
               }`}
             >
-              {f === "all" ? "All" : STATUS_INFO[f].label} · {count}
+              {f === "all" ? "All" : STATUS_INFO[f].label}
+              <span className="opacity-70">{count}</span>
             </Link>
           );
         })}
       </div>
 
       {orders.length === 0 ? (
-        <p className="mt-10 text-center text-sm text-muted">
-          No orders in this state.
-        </p>
+        <p className="mt-12 text-center text-sm text-muted">No orders in this state.</p>
       ) : (
-        <div className="mt-4 overflow-x-auto rounded-2xl border border-edge">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted">
-              <tr>
-                <th className="px-4 py-3">Reference</th>
-                <th className="px-4 py-3">Receives</th>
-                <th className="px-4 py-3">Sender pays</th>
-                <th className="px-4 py-3">Delivery</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Created</th>
+        <div className="mt-5 overflow-x-auto rounded-2xl border border-edge bg-surface">
+          <table className="w-full min-w-[680px] border-collapse text-sm">
+            <thead>
+              <tr className="text-left text-[11px] uppercase tracking-[.06em] text-muted">
+                <th className="px-4 pb-2.5 pt-4 font-semibold">Ref</th>
+                <th className="px-4 pb-2.5 pt-4 font-semibold">Customer</th>
+                <th className="px-4 pb-2.5 pt-4 font-semibold">Direction</th>
+                <th className="px-4 pb-2.5 pt-4 font-semibold">Sends</th>
+                <th className="px-4 pb-2.5 pt-4 font-semibold">Placed</th>
+                <th className="px-4 pb-2.5 pt-4 font-semibold">Status</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((order) => (
-                <tr key={order.id} className="border-t border-edge hover:bg-surface">
+                <tr
+                  key={order.id}
+                  className={`border-t border-edge hover:bg-surface-2 ${
+                    ["rejected", "cancelled"].includes(order.status) ? "opacity-75" : ""
+                  }`}
+                >
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/orders/${order.id}`}
-                      className="font-mono font-semibold text-accent hover:underline"
+                      className="font-mono text-[13px] font-semibold text-primary hover:underline"
                     >
                       {order.reference}
                     </Link>
                   </td>
                   <td className="px-4 py-3 font-semibold">
-                    {formatMoney(Number(order.receive_amount), order.receive_currency)}
+                    {order.profiles?.full_name ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-[13px] text-muted">
+                    {order.send_currency} → {order.receive_currency}
                   </td>
                   <td className="px-4 py-3">
                     {formatMoney(Number(order.send_amount), order.send_currency)}
                   </td>
-                  <td className="px-4 py-3">
-                    {order.delivery_method === "cash" ? "Cash" : "Bank"}
+                  <td className="px-4 py-3 text-[13px] text-muted">
+                    <LocalTime iso={order.created_at} />
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={order.status} />
-                  </td>
-                  <td className="px-4 py-3 text-muted">
-                    <LocalTime iso={order.created_at} />
                   </td>
                 </tr>
               ))}

@@ -96,39 +96,47 @@ export const DIRECTION_INFO: Record<
   INR_TO_TZS: { send: "INR", receive: "TZS", label: "Receive TZS in Tanzania" },
 };
 
+export type StatusTone =
+  | "warning"
+  | "info"
+  | "primary"
+  | "success"
+  | "danger"
+  | "neutral";
+
 export const STATUS_INFO: Record<
   OrderStatus,
-  { label: string; description: string; tone: "pending" | "good" | "bad" }
+  { label: string; description: string; tone: StatusTone }
 > = {
   awaiting_payment: {
     label: "Awaiting payment",
     description: "Send the money to AlphaPay and upload your receipt.",
-    tone: "pending",
+    tone: "warning",
   },
   under_review: {
     label: "Under review",
     description: "Our team is verifying your payment receipt.",
-    tone: "pending",
+    tone: "info",
   },
   confirmed: {
     label: "Confirmed",
     description: "Payment verified. Your money is on its way.",
-    tone: "good",
+    tone: "primary",
   },
   delivered: {
     label: "Delivered",
     description: "The money has been delivered. Thank you for using AlphaPay!",
-    tone: "good",
+    tone: "success",
   },
   rejected: {
     label: "Rejected",
     description: "There was a problem with this order. See the note from our team.",
-    tone: "bad",
+    tone: "danger",
   },
   cancelled: {
     label: "Cancelled",
     description: "This order was cancelled.",
-    tone: "bad",
+    tone: "neutral",
   },
 };
 

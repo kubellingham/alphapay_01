@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "Send money between Tanzania and India. See live TZS/INR rates, place an order, and get cash or a bank transfer delivered.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0b1220",
-    theme_color: "#0b1220",
+    background_color: "#0C1116",
+    theme_color: "#0C1116",
     icons: [
       {
         src: "/icons/icon-192.png",

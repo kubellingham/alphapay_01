@@ -1,14 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LogoMark } from "@/components/logo";
 import { PrintButton } from "@/components/print-button";
+import { StatusBadge } from "@/components/status-badge";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import {
-  formatDateTime,
-  formatMoney,
-  type Order,
-  type Profile,
-} from "@/lib/types";
+import { formatDateTime, formatMoney, type Order, type Profile } from "@/lib/types";
 
 export const metadata = { title: "Receipt" };
 export const dynamic = "force-dynamic";
@@ -40,115 +37,110 @@ export default async function ReceiptPage({
   ]);
   const customer = customerData as Profile | null;
   const deliveredAt = deliveredEvent?.created_at ?? order.updated_at;
-
   const details = order.delivery_details as unknown as Record<string, string>;
+  const recipient =
+    details.recipient_name ?? details.account_name ?? customer?.full_name ?? "—";
+  const deliveryLine =
+    order.delivery_method === "cash"
+      ? `Cash · ${[details.city, details.address].filter(Boolean)[0] ?? ""}`
+      : `Bank transfer · ${details.bank_name ?? ""}`;
 
   return (
-    <div className="print:text-black">
-      {/* The receipt card — styled to look right on screen AND on paper */}
+    <div>
       <div
         id="receipt"
-        className="rounded-2xl border border-edge bg-white p-8 text-slate-900 shadow-xl print:rounded-none print:border-0 print:p-0 print:shadow-none"
+        className="overflow-hidden rounded-[18px] border border-edge bg-surface shadow-float print:rounded-none print:border-0 print:shadow-none"
       >
-        <div className="flex items-start justify-between border-b-2 border-emerald-500 pb-5">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-emerald-500 font-black text-white">
-                A
-              </span>
-              <span className="text-xl font-black tracking-tight">AlphaPay</span>
+        {/* Flag-gradient bar: jade for Tanzania-India green, marigold for the gold */}
+        <div
+          className="h-2"
+          style={{
+            background: "linear-gradient(90deg, var(--primary) 0 50%, var(--accent) 50% 100%)",
+          }}
+        />
+        <div className="p-6 pb-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <LogoMark size={36} />
+              <div>
+                <p className="text-[17px] font-extrabold leading-tight tracking-tight">
+                  AlphaPay
+                </p>
+                <p className="text-[11px] text-muted">Money transfer receipt</p>
+              </div>
             </div>
-            <p className="mt-1 text-xs text-slate-500">
-              Tanzania 🇹🇿 ⇄ 🇮🇳 India money transfer
-            </p>
+            <StatusBadge status="delivered" />
           </div>
-          <div className="text-right">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-600">
-              Official receipt
-            </p>
-            <p className="mt-1 font-mono text-sm font-bold">{order.reference}</p>
-          </div>
-        </div>
 
-        <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-          <div>
-            <dt className="text-xs uppercase tracking-wide text-slate-500">Customer</dt>
-            <dd className="mt-0.5 font-semibold">{customer?.full_name ?? "—"}</dd>
+          <div className="mt-5 flex justify-between border-b border-dashed border-edge-strong pb-4">
+            <div>
+              <p className="text-[11px] text-muted">Receipt no.</p>
+              <p className="font-mono text-[15px] font-semibold">{order.reference}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[11px] text-muted">Date delivered</p>
+              <p className="text-sm font-semibold">{formatDateTime(deliveredAt)} IST</p>
+            </div>
           </div>
-          <div>
-            <dt className="text-xs uppercase tracking-wide text-slate-500">Delivered on</dt>
-            <dd className="mt-0.5 font-semibold">{formatDateTime(deliveredAt)} (IST)</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase tracking-wide text-slate-500">Order placed</dt>
-            <dd className="mt-0.5 font-semibold">{formatDateTime(order.created_at)} (IST)</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase tracking-wide text-slate-500">Delivery method</dt>
-            <dd className="mt-0.5 font-semibold">
-              {order.delivery_method === "cash" ? "Cash delivery" : "Bank transfer"}
-            </dd>
-          </div>
-        </dl>
 
-        <table className="mt-6 w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-              <th className="py-2">Description</th>
-              <th className="py-2 text-right">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-slate-100">
-              <td className="py-2.5">Amount sent ({order.send_currency})</td>
-              <td className="py-2.5 text-right font-semibold">
-                {formatMoney(Number(order.send_amount), order.send_currency)}
-              </td>
-            </tr>
-            <tr className="border-b border-slate-100">
-              <td className="py-2.5">
-                Exchange rate applied (1 {order.send_currency} → {order.receive_currency})
-              </td>
-              <td className="py-2.5 text-right font-mono">
+          <div className="border-b border-dashed border-edge-strong py-5 text-center">
+            <p className="text-xs text-muted">Amount delivered</p>
+            <p className="mt-1 text-[32px] font-extrabold text-primary">
+              {formatMoney(Number(order.receive_amount), order.receive_currency)}
+            </p>
+            <p className="mt-0.5 text-[13px] text-muted">
+              from {formatMoney(Number(order.send_amount), order.send_currency)} · rate{" "}
+              <span className="font-mono">
                 {Number(order.rate_used).toLocaleString("en-US", {
                   maximumSignificantDigits: 6,
                 })}
-              </td>
-            </tr>
-            <tr>
-              <td className="py-3 font-bold">Amount delivered ({order.receive_currency})</td>
-              <td className="py-3 text-right text-lg font-black text-emerald-600">
-                {formatMoney(Number(order.receive_amount), order.receive_currency)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </span>
+            </p>
+          </div>
 
-        <div className="mt-4 rounded-lg bg-slate-50 p-4 text-xs text-slate-600 print:border print:border-slate-200">
-          <p className="font-semibold uppercase tracking-wide text-slate-500">
-            Delivered to
-          </p>
-          <p className="mt-1">
-            {Object.entries(details)
-              .filter(([, v]) => v)
-              .map(([k, v]) => `${k.replaceAll("_", " ")}: ${v}`)
-              .join(" · ")}
-          </p>
-        </div>
+          <dl className="flex flex-col gap-2.5 py-4 text-[13.5px]">
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted">Customer</dt>
+              <dd className="font-semibold">{customer?.full_name ?? "—"}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted">Recipient</dt>
+              <dd className="font-semibold">{recipient}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted">Delivery</dt>
+              <dd className="font-semibold">{deliveryLine}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted">Order placed</dt>
+              <dd className="font-semibold">{formatDateTime(order.created_at)} IST</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted">Reference</dt>
+              <dd className="font-mono font-semibold">{order.reference}</dd>
+            </div>
+          </dl>
 
-        <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-4 text-xs text-slate-500">
-          <span>
-            Status: <span className="font-bold text-emerald-600">DELIVERED ✓</span>
-          </span>
-          <span>Generated by AlphaPay · {formatDateTime(new Date().toISOString())} IST</span>
+          <div className="flex items-center gap-2 border-t border-edge pt-4 text-[11.5px] text-faint">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path
+                d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+              <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Verified &amp; delivered by AlphaPay
+          </div>
         </div>
       </div>
 
       <div className="mt-6 space-y-3 print:hidden">
         <PrintButton />
         <p className="text-center text-xs text-muted">
-          “Download PDF” opens your device&apos;s print screen — choose “Save as
-          PDF” to keep or share the receipt.
+          “Download PDF / Print” opens your device&apos;s print screen — choose
+          “Save as PDF” to keep or share the receipt.
         </p>
         <Link
           href={`/orders/${order.id}`}

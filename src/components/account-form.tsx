@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { saveCollectionAccount, type AdminActionState } from "@/lib/actions/admin";
 
 const inputClass =
-  "mt-1 w-full rounded-xl border border-edge bg-background px-3 py-2 outline-none focus:border-accent";
+  "mt-1.5 h-11 w-full rounded-xl border border-edge-strong bg-surface-2 px-3.5 text-base outline-none";
 const labelClass = "block text-sm font-medium";
 
 export function AccountForm() {
@@ -73,12 +73,12 @@ export function AccountForm() {
 
       {state.error && <p className="text-sm text-danger">{state.error}</p>}
       {state.saved && !state.error && (
-        <p className="text-sm text-accent">Account added.</p>
+        <p className="text-sm text-success">Account added.</p>
       )}
 
       <button
         disabled={pending}
-        className="w-full rounded-xl bg-accent py-2.5 font-bold text-background disabled:opacity-60"
+        className="h-12 w-full rounded-xl bg-primary font-bold text-primary-fg hover:bg-primary-hover disabled:opacity-60"
       >
         {pending ? "Saving…" : "Add collection account"}
       </button>

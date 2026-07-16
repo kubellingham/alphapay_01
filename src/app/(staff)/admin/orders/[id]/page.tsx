@@ -2,9 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { DeleteOrderButton } from "@/components/delete-order-button";
+import { LocalTime } from "@/components/local-time";
 import { OrderReviewActions } from "@/components/order-review-actions";
 import { StatusBadge } from "@/components/status-badge";
-import { LocalTime } from "@/components/local-time";
 import { StatusTimeline } from "@/components/status-timeline";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -29,16 +29,29 @@ export default async function AdminOrderDetailPage({
   if (!data) notFound();
   const order = data as Order;
 
-  const [{ data: customerData }, { data: eventsData }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", order.user_id).single(),
-    supabase
-      .from("order_events")
-      .select("*")
-      .eq("order_id", id)
-      .order("created_at", { ascending: true }),
-  ]);
+  const [{ data: customerData }, { data: eventsData }, { data: rateRow }] =
+    await Promise.all([
+      supabase.from("profiles").select("*").eq("id", order.user_id).single(),
+      supabase
+        .from("order_events")
+        .select("*")
+        .eq("order_id", id)
+        .order("created_at", { ascending: true }),
+      order.margin_used == null
+        ? supabase.from("rates").select("margin_percent").eq("pair", order.direction).single()
+        : Promise.resolve({ data: null }),
+    ]);
   const customer = customerData as Profile | null;
   const events = (eventsData ?? []) as OrderEvent[];
+
+  const margin =
+    order.margin_used != null
+      ? Number(order.margin_used)
+      : Number(rateRow?.margin_percent ?? 0);
+  const estMargin =
+    margin > 0 && margin < 100
+      ? Number(order.receive_amount) * (margin / (100 - margin))
+      : 0;
 
   let receiptUrl: string | null = null;
   let receiptIsPdf = false;
@@ -61,66 +74,139 @@ export default async function AdminOrderDetailPage({
   );
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
       <AutoRefresh intervalMs={15000} />
-      <div className="space-y-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="font-mono text-xs text-muted">{order.reference}</p>
-            <h2 className="text-2xl font-bold">
-              {formatMoney(Number(order.receive_amount), order.receive_currency)}
-            </h2>
-            <p className="text-sm text-muted">
-              Sender pays {formatMoney(Number(order.send_amount), order.send_currency)} ·
-              locked rate{" "}
-              {Number(order.rate_used).toLocaleString("en-US", {
-                maximumSignificantDigits: 6,
-              })}{" "}
-              · <LocalTime iso={order.created_at} />
-            </p>
-          </div>
-          <StatusBadge status={order.status} />
-        </div>
 
-        <section className="rounded-2xl border border-edge bg-surface p-5">
-          <h3 className="font-bold">Payment receipt</h3>
+      <div className="lg:col-span-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/admin/orders"
+            className="flex items-center gap-1 text-[13px] text-muted hover:text-foreground"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Queue
+          </Link>
+          <h2 className="font-mono text-xl font-extrabold">{order.reference}</h2>
+          <StatusBadge status={order.status} />
+          <span className="text-[13px] text-muted">
+            <LocalTime iso={order.created_at} />
+          </span>
+        </div>
+      </div>
+
+      {/* Left column: receipt + actions */}
+      <div className="space-y-4">
+        <section>
+          <p className="mb-2.5 text-xs font-bold uppercase tracking-wide text-muted">
+            Payment receipt
+          </p>
           {receiptUrl ? (
-            <div className="mt-3">
-              {receiptIsPdf ? (
-                <a
-                  href={receiptUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold text-accent underline"
-                >
-                  Open PDF receipt ↗
-                </a>
-              ) : (
-                <a href={receiptUrl} target="_blank" rel="noreferrer">
-                  {/* Signed URL — next/image can't optimize it */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={receiptUrl}
-                    alt={`Receipt for ${order.reference}`}
-                    className="max-h-[480px] rounded-xl border border-edge"
-                  />
-                </a>
-              )}
-            </div>
+            receiptIsPdf ? (
+              <a
+                href={receiptUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex h-[120px] items-center justify-center rounded-[14px] border border-edge bg-surface-2 font-bold text-primary underline"
+              >
+                Open PDF receipt ↗
+              </a>
+            ) : (
+              <a href={receiptUrl} target="_blank" rel="noreferrer">
+                {/* Signed URL — next/image can't optimize it */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={receiptUrl}
+                  alt={`Receipt for ${order.reference}`}
+                  className="max-h-[420px] rounded-[14px] border border-edge"
+                />
+              </a>
+            )
           ) : (
-            <p className="mt-2 text-sm text-muted">No receipt uploaded yet.</p>
+            <div className="flex h-[120px] items-center justify-center rounded-[14px] border border-edge bg-surface-2 text-sm text-faint">
+              No receipt uploaded yet.
+            </div>
           )}
         </section>
 
-        <section className="rounded-2xl border border-edge bg-surface p-5">
-          <h3 className="font-bold">Deliver to</h3>
-          <dl className="mt-3 space-y-1 text-sm">
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">Method</dt>
-              <dd className="font-semibold">
-                {order.delivery_method === "cash" ? "Cash to address" : "Bank transfer"}
-              </dd>
+        <section className="space-y-3">
+          <OrderReviewActions orderId={order.id} status={order.status} />
+          {order.status === "delivered" && (
+            <div className="flex flex-wrap gap-2.5">
+              <Link
+                href={`/orders/${order.id}/receipt`}
+                className="flex h-11 flex-1 items-center justify-center rounded-xl border border-edge-strong bg-surface-2 text-sm font-bold hover:border-primary"
+              >
+                🧾 Official receipt
+              </Link>
+              {phoneDigits && (
+                <a
+                  href={`https://wa.me/${phoneDigits}?text=${waMessage}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-edge-strong bg-surface-2 text-sm font-bold text-[#25c93f]"
+                >
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M12 2a10 10 0 0 0-8.6 15l-1.4 5 5.1-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.4-.2-3 .8.8-2.9-.2-.4A8 8 0 0 1 12 4z" />
+                  </svg>
+                  WhatsApp
+                </a>
+              )}
             </div>
+          )}
+          {order.staff_note && (
+            <p className="rounded-xl bg-surface-2 px-3.5 py-2.5 text-xs text-muted">
+              Note on file: “{order.staff_note}”
+            </p>
+          )}
+        </section>
+      </div>
+
+      {/* Right column: facts */}
+      <div className="space-y-4">
+        <section className="rounded-[14px] border border-edge bg-surface p-4">
+          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">Amounts</p>
+          <div className="space-y-2 text-[13px]">
+            <div className="flex justify-between">
+              <span className="text-muted">Customer pays</span>
+              <span className="text-[15px] font-bold">
+                {formatMoney(Number(order.send_amount), order.send_currency)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">We deliver</span>
+              <span className="text-[15px] font-bold text-primary">
+                {formatMoney(Number(order.receive_amount), order.receive_currency)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Locked rate</span>
+              <span className="font-mono font-semibold text-accent">
+                {Number(order.rate_used).toLocaleString("en-US", {
+                  maximumSignificantDigits: 6,
+                })}
+              </span>
+            </div>
+            {estMargin > 0 && (
+              <div className="flex justify-between border-t border-edge pt-2">
+                <span className="text-muted">Est. margin</span>
+                <span className="text-[15px] font-bold text-success">
+                  +{formatMoney(estMargin, order.receive_currency)}
+                </span>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="rounded-[14px] border border-edge bg-surface p-4">
+          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">
+            Delivery details
+          </p>
+          <p className="text-sm font-bold">
+            {order.delivery_method === "cash" ? "Cash" : "Bank transfer"}
+          </p>
+          <dl className="mt-2 space-y-1 text-[13px]">
             {Object.entries(order.delivery_details as unknown as Record<string, string>).map(
               ([k, v]) =>
                 v ? (
@@ -132,37 +218,22 @@ export default async function AdminOrderDetailPage({
             )}
           </dl>
         </section>
-      </div>
 
-      <div className="space-y-6">
-        <section className="rounded-2xl border border-warning/40 bg-surface p-5">
-          <h3 className="font-bold">Actions</h3>
-          <div className="mt-3">
-            <OrderReviewActions orderId={order.id} status={order.status} />
-          </div>
-          {order.staff_note && (
-            <p className="mt-3 rounded-lg bg-surface-2 px-3 py-2 text-xs text-muted">
-              Note on file: “{order.staff_note}”
-            </p>
-          )}
-        </section>
-
-        <section className="rounded-2xl border border-edge bg-surface p-5 text-sm">
-          <h3 className="font-bold">Customer</h3>
-          <dl className="mt-3 space-y-1">
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">Name</dt>
-              <dd className="font-semibold">{customer?.full_name ?? "—"}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
+        <section className="rounded-[14px] border border-edge bg-surface p-4">
+          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">
+            Customer contact
+          </p>
+          <p className="text-sm font-bold">{customer?.full_name ?? "—"}</p>
+          <dl className="mt-2 space-y-1.5 text-[13px]">
+            <div className="flex justify-between gap-3">
               <dt className="text-muted">Email</dt>
-              <dd className="font-semibold">{customer?.email ?? "—"}</dd>
+              <dd className="truncate font-semibold">{customer?.email ?? "—"}</dd>
             </div>
-            <div className="flex justify-between gap-4">
+            <div className="flex justify-between gap-3">
               <dt className="text-muted">Phone</dt>
-              <dd className="font-semibold">
+              <dd className="font-mono">
                 {customer?.phone ? (
-                  <a href={`tel:${customer.phone}`} className="text-accent underline">
+                  <a href={`tel:${customer.phone}`} className="text-primary underline">
                     {customer.phone}
                   </a>
                 ) : (
@@ -173,45 +244,12 @@ export default async function AdminOrderDetailPage({
           </dl>
         </section>
 
-        {order.status === "delivered" && (
-          <section className="rounded-2xl border border-accent/40 bg-surface p-5">
-            <h3 className="font-bold">Receipt</h3>
-            <div className="mt-3 space-y-2">
-              <Link
-                href={`/orders/${order.id}/receipt`}
-                className="block rounded-xl border border-edge py-2.5 text-center text-sm font-semibold hover:border-accent"
-              >
-                🧾 View official receipt
-              </Link>
-              {phoneDigits && (
-                <a
-                  href={`https://wa.me/${phoneDigits}?text=${waMessage}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block rounded-xl bg-[#25D366] py-2.5 text-center text-sm font-bold text-background"
-                >
-                  Send receipt via WhatsApp
-                </a>
-              )}
-            </div>
-          </section>
-        )}
-
-        <section className="rounded-2xl border border-edge bg-surface p-5">
-          <h3 className="font-bold">History</h3>
-          <div className="mt-4">
-            <StatusTimeline events={events} />
-          </div>
+        <section className="rounded-[14px] border border-edge bg-surface p-4">
+          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">History</p>
+          <StatusTimeline events={events} currentStatus={order.status} />
         </section>
 
         <DeleteOrderButton orderId={order.id} reference={order.reference} />
-
-        <Link
-          href="/admin/orders"
-          className="block text-center text-sm text-muted underline"
-        >
-          ← Back to queue
-        </Link>
       </div>
     </div>
   );

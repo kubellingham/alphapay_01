@@ -47,7 +47,7 @@ export function DeleteOrderButton({
         </button>
         <button
           disabled={pending}
-          className="w-1/2 rounded-xl bg-danger py-2.5 text-sm font-bold text-background disabled:opacity-60"
+          className="w-1/2 rounded-xl bg-danger py-2.5 text-sm font-bold text-danger-fg disabled:opacity-60"
         >
           {pending ? (
             <span className="inline-flex items-center gap-2">

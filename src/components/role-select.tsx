@@ -29,7 +29,7 @@ export function RoleSelect({
         name="role"
         defaultValue={role}
         disabled={pending}
-        className="rounded-lg border border-edge bg-background px-2 py-1 text-xs font-semibold outline-none focus:border-accent"
+        className="rounded-lg border border-edge-strong bg-surface-2 px-2 py-1 text-xs font-semibold outline-none"
       >
         <option value="student">student</option>
         <option value="staff">staff</option>
@@ -37,12 +37,12 @@ export function RoleSelect({
       </select>
       <button
         disabled={pending}
-        className="rounded-lg bg-accent px-2.5 py-1 text-xs font-bold text-background disabled:opacity-50"
+        className="rounded-lg bg-primary px-2.5 py-1 text-xs font-bold text-primary-fg disabled:opacity-50"
       >
         {pending ? "…" : "Set"}
       </button>
       {state.error && <span className="text-xs text-danger">{state.error}</span>}
-      {state.saved && !state.error && <span className="text-xs text-accent">✓</span>}
+      {state.saved && !state.error && <span className="text-xs text-success">✓</span>}
     </form>
   );
 }
