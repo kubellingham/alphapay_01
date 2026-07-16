@@ -35,6 +35,12 @@ const FILTER_TEXT: Record<string, string> = {
 
 type OrderWithProfile = Order & { profiles: { full_name: string | null } | null };
 
+/** The name typed on the order (recipient / account holder) — never the Google name. */
+function orderName(order: OrderWithProfile): string {
+  const d = order.delivery_details as unknown as Record<string, string>;
+  return d.recipient_name || d.account_name || order.profiles?.full_name || "—";
+}
+
 export default async function AdminOrdersPage({
   searchParams,
 }: {
@@ -90,7 +96,7 @@ export default async function AdminOrdersPage({
             <thead>
               <tr className="text-left text-[11px] uppercase tracking-[.06em] text-muted">
                 <th className="px-4 pb-2.5 pt-4 font-semibold">Ref</th>
-                <th className="px-4 pb-2.5 pt-4 font-semibold">Customer</th>
+                <th className="px-4 pb-2.5 pt-4 font-semibold">Recipient</th>
                 <th className="px-4 pb-2.5 pt-4 font-semibold">Direction</th>
                 <th className="px-4 pb-2.5 pt-4 font-semibold">Sends</th>
                 <th className="px-4 pb-2.5 pt-4 font-semibold">Placed</th>
@@ -113,9 +119,7 @@ export default async function AdminOrdersPage({
                       {order.reference}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 font-semibold">
-                    {order.profiles?.full_name ?? "—"}
-                  </td>
+                  <td className="px-4 py-3 font-semibold">{orderName(order)}</td>
                   <td className="px-4 py-3 text-[13px] text-muted">
                     {order.send_currency} → {order.receive_currency}
                   </td>

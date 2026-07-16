@@ -70,7 +70,8 @@ export default async function OrderDetailPage({
       {/* Statuses move without the user having to pull-to-refresh */}
       {!isSettled && <AutoRefresh />}
 
-      {created && (
+      {/* Only while the order is actually waiting for payment — never after */}
+      {created && order.status === "awaiting_payment" && (
         <div className="flex items-center gap-2.5 rounded-xl border border-edge border-l-[3px] border-l-success bg-surface-2 px-3.5 py-3 text-[13px]">
           <span className="grid h-5 w-5 flex-none place-items-center rounded-full bg-success text-xs font-extrabold text-success-fg">
             ✓
@@ -91,19 +92,19 @@ export default async function OrderDetailPage({
         <StatusBadge status={order.status} />
       </div>
 
-      {/* Amounts */}
+      {/* Amounts — receive first */}
       <div className="rounded-2xl border border-edge bg-surface p-4">
         <div className="flex items-center justify-between">
-          <span className="text-[13px] text-muted">You send</span>
-          <span className="text-base font-extrabold">
-            {formatMoney(Number(order.send_amount), order.send_currency)}
+          <span className="text-[13px] text-muted">Receive</span>
+          <span className="text-base font-extrabold text-primary">
+            {formatMoney(Number(order.receive_amount), order.receive_currency)}
           </span>
         </div>
         <div className="my-3 h-px bg-edge" />
         <div className="flex items-center justify-between">
-          <span className="text-[13px] text-muted">They receive</span>
-          <span className="text-base font-extrabold text-primary">
-            {formatMoney(Number(order.receive_amount), order.receive_currency)}
+          <span className="text-[13px] text-muted">Send</span>
+          <span className="text-base font-extrabold">
+            {formatMoney(Number(order.send_amount), order.send_currency)}
           </span>
         </div>
         <div className="mt-2 flex items-center justify-between text-xs">
@@ -194,9 +195,14 @@ export default async function OrderDetailPage({
           {order.delivery_method === "cash" ? "Cash to address" : "Bank transfer"}
         </p>
         <p className="mt-1 text-[13px] leading-relaxed text-muted">
-          {Object.values(order.delivery_details as unknown as Record<string, string>)
-            .filter(Boolean)
-            .join(" · ")}
+          {(() => {
+            const d = order.delivery_details as unknown as Record<string, string>;
+            const ordered =
+              order.delivery_method === "cash"
+                ? [d.recipient_name, d.address, d.city, d.landmark]
+                : [d.account_name, d.bank_name, d.account_number, d.branch_or_ifsc];
+            return ordered.filter(Boolean).join(" · ");
+          })()}
         </p>
       </section>
 

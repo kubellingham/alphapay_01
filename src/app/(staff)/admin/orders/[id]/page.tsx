@@ -63,9 +63,12 @@ export default async function AdminOrderDetailPage({
     receiptIsPdf = order.receipt_path.endsWith(".pdf");
   }
 
+  const details = order.delivery_details as unknown as Record<string, string>;
+  // Use the name typed on the order, not the Google account name.
+  const orderName = details.recipient_name || details.account_name || "";
   const phoneDigits = customer?.phone?.replace(/[^0-9]/g, "") ?? "";
   const waMessage = encodeURIComponent(
-    `Hello ${customer?.full_name ?? ""}! 👋 AlphaPay here.\n\n` +
+    `Hello ${orderName}! 👋 AlphaPay here.\n\n` +
       `Your transfer ${order.reference} has been delivered:\n` +
       `• You received: ${formatMoney(Number(order.receive_amount), order.receive_currency)}\n` +
       `• Sender paid: ${formatMoney(Number(order.send_amount), order.send_currency)}\n\n` +
@@ -221,9 +224,9 @@ export default async function AdminOrderDetailPage({
 
         <section className="rounded-[14px] border border-edge bg-surface p-4">
           <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">
-            Customer contact
+            Contact
           </p>
-          <p className="text-sm font-bold">{customer?.full_name ?? "—"}</p>
+          <p className="text-sm font-bold">{orderName || customer?.full_name || "—"}</p>
           <dl className="mt-2 space-y-1.5 text-[13px]">
             <div className="flex justify-between gap-3">
               <dt className="text-muted">Email</dt>
