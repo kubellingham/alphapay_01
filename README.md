@@ -66,6 +66,12 @@ The staff dashboard appears at `/admin` (Orders · Rates · Accounts · Users).
 
 ### 4. Refresh market rates
 
+**Live rates (recommended):** create a free [Wise](https://wise.com) account,
+generate a personal API token (Settings → API tokens, read-only), and set it
+as `WISE_API_TOKEN`. Rates then come from Wise's mid-market feed — the same
+rate Google/XE display — and refresh within ~2 minutes while the site has
+traffic. Without the token, the free daily feed is used instead.
+
 Rates stay fresh three ways, all needing `SUPABASE_SERVICE_ROLE_KEY`:
 
 - **On traffic (main path):** any page view that finds rates older than an
