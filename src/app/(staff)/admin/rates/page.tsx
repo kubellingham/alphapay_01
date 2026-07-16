@@ -1,4 +1,5 @@
 import { MarginForm } from "@/components/margin-form";
+import { RefreshRatesButton } from "@/components/refresh-rates-button";
 import { requireStaff } from "@/lib/auth";
 import { getRates } from "@/lib/rates";
 import { DIRECTION_INFO, formatDateTime, type Direction } from "@/lib/types";
@@ -13,6 +14,9 @@ export default async function AdminRatesPage() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
+      <div className="md:col-span-2">
+        <RefreshRatesButton />
+      </div>
       {(Object.keys(DIRECTION_INFO) as Direction[]).map((pair) => {
         const rate = rates[pair];
         const info = DIRECTION_INFO[pair];
@@ -61,8 +65,10 @@ export default async function AdminRatesPage() {
         );
       })}
       <p className="text-xs text-muted md:col-span-2">
-        Market rates refresh hourly from the FX feed (open.er-api.com). The
-        customer rate is the market rate minus the margin — the margin is
+        Market rates come from the FX feed (open.er-api.com) and stay fresh
+        automatically: any visit to the site refreshes rates older than an
+        hour, with a daily scheduled run as backup — or use the button above.
+        The customer rate is the market rate minus the margin — the margin is
         AlphaPay&apos;s revenue on each transfer. Rates on existing orders are never
         affected.
       </p>
